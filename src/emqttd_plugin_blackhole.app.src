@@ -1,0 +1,9 @@
+{application,emqttd_plugin_blackhole,
+             [{description,"emqttd storage Plugin"},
+              {vsn,"0.0.1"},
+              {registered,[]},
+              {applications,[kernel,stdlib,eredis,ecpool]},
+              {mod,{emqttd_plugin_blackhole_app,[]}},
+              {env,[]},
+              {modules,[emqttd_plugin_blackhole,emqttd_plugin_blackhole_app,
+                        emqttd_plugin_blackhole_sup]}]}.
