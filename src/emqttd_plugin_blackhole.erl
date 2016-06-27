@@ -26,9 +26,6 @@ load(Env) ->
     emqttd:hook('message.acked', fun ?MODULE:on_message_acked/3, [Env]).
 
 on_client_connected(ConnAck, Client = #mqtt_client{client_id = ClientId}, _Env) ->
-    %{ok, IoDevice} = file:open("/tmp/emqtt.debug.log", write),
-    %%io:format(IoDevice, "client ~s connected, connack: ~w~n", [ClientId, ConnAck]),
-    %%file:close(IoDevice),
     io:format("client ~s connected, connack: ~w~n", [ClientId, ConnAck]),
     {ok, Client}.
 
@@ -54,7 +51,23 @@ on_message_publish(Message = #mqtt_message{topic = <<"$SYS/", _/binary>>}, _Env)
     {ok, Message};
 
 on_message_publish(Message, _Env) ->
-    io:format("publish ~s~n", [emqttd_message:format(Message)]),
+    code:add_path("/usr/lib/erlang/lib/ekaf-1.5.4/deps/gproc/ebin"),
+    code:add_path("/usr/lib/erlang/lib/ekaf-1.5.4/deps/kafkamocker/ebin"),
+
+    application:load(gproc),
+    application:load(kafkamocker),
+    application:load(ekaf),
+
+    application:set_env(ekaf, ekaf_bootstrap_broker, {"localhost", 9092}),
+
+    application:start(gproc),
+    application:start(kafkamocker),
+    application:start(ekaf),
+    KafkaTopic = <<"test">>,
+    Topic = Message#mqtt_message.topic,
+    ekaf:produce_sync(KafkaTopic, <<"hihihihihihihiiiiiiiiiiiiiiii">>),
+
+    io:format("publish ~s ~s~n", [emqttd_message:format(Message), Topic]),
     {ok, Message}.
 
 on_message_delivered(ClientId, Message, _Env) ->
